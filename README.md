@@ -1,0 +1,1 @@
+# Logstash output plugin for pushing events to Google Cloud PubSub
