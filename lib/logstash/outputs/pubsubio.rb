@@ -7,7 +7,6 @@ require 'base64'
 class LogStash::Outputs::Pubsubio < LogStash::Outputs::Base
   config_name 'pubsubio'
   config :topic, validate: :string, required: true
-  concurrency :shared
 
   public
 
@@ -17,12 +16,22 @@ class LogStash::Outputs::Pubsubio < LogStash::Outputs::Base
   end # def register
 
   public
+  def multi_receive(events)
+    events.map! {|event| {data: event.to_json.to_str} }
+    publish_to_pubsub(events)
+  end
 
+  public
   def receive(event)
     pubsub_message = {
       data: event.to_json.to_str
     }
-    request = Google::Apis::PubsubV1::PublishRequest.new(messages: [pubsub_message])
+    publish_to_pubsub([pubsub_message])
+  end # def event
+
+  private 
+  def publish_to_pubsub(messages)
+    request = Google::Apis::PubsubV1::PublishRequest.new(messages: messages)
     @logger.debug('GCE PubSub message created')
     begin
       result = @pubsub.publish_topic(@topic, request)
@@ -31,5 +40,4 @@ class LogStash::Outputs::Pubsubio < LogStash::Outputs::Base
     rescue StandardError => e
       @logger.error(e)
     end
-  end # def event
 end # class LogStash::Outputs::Pubsubio
