@@ -37,8 +37,8 @@ class LogStash::Outputs::Pubsubio < LogStash::Outputs::Base
       @pubsub_mutex.synchronize do
         result = @pubsub.publish_topic(@topic, request)
         ids = result.message_ids
+        @logger.debug("GCE PubSub message published to topic #{@topic}, received the following IDs: '#{ids}'")
       end
-      @logger.debug("GCE PubSub message published to topic #{@topic}, received the following IDs: '#{ids}'")
     rescue Exception => e
       @logger.error("Exception occured during publishing", :exception => e)
     end
