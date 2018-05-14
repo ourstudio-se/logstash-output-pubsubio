@@ -39,7 +39,7 @@ class LogStash::Outputs::Pubsubio < LogStash::Outputs::Base
         ids = result.message_ids
       end
       @logger.debug("GCE PubSub message published to topic #{@topic}, received the following IDs: '#{ids}'")
-    rescue Exception
+    rescue Exception e
       @logger.error("Exception occured during publishing", :exception => e)
     end
   end # def publish_to_pubsub
