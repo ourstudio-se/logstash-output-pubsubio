@@ -10,7 +10,7 @@ class LogStash::Outputs::Pubsubio < LogStash::Outputs::Base
 
   public
   def register
-    @pubusub_mutex = Mutex.new
+    @pubsub_mutex = Mutex.new
     @pubsub = Google::Apis::PubsubV1::PubsubService.new
     @pubsub.authorization = Google::Auth.get_application_default([Google::Apis::PubsubV1::AUTH_PUBSUB])
   end # def register
@@ -34,13 +34,13 @@ class LogStash::Outputs::Pubsubio < LogStash::Outputs::Base
     request = Google::Apis::PubsubV1::PublishRequest.new(messages: messages)
     @logger.debug('GCE PubSub message created')
     begin
-      @pubusub_mutex.synchronize do
+      @pubsub_mutex.synchronize do
         result = @pubsub.publish_topic(@topic, request)
         ids = result.message_ids
       end
       @logger.debug("GCE PubSub message published to topic #{@topic}, received the following IDs: '#{ids}'")
-    rescue StandardError => e
-      @logger.error(e)
+    rescue Exception
+      @logger.error("Exception occured during publishing", :exception => e)
     end
   end # def publish_to_pubsub
 end # class LogStash::Outputs::Pubsubio
