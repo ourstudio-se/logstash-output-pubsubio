@@ -9,7 +9,6 @@ class LogStash::Outputs::Pubsubio < LogStash::Outputs::Base
   config :topic, validate: :string, required: true
 
   public
-
   def register
     @pubsub = Google::Apis::PubsubV1::PubsubService.new
     @pubsub.authorization = Google::Auth.get_application_default([Google::Apis::PubsubV1::AUTH_PUBSUB])
@@ -27,7 +26,7 @@ class LogStash::Outputs::Pubsubio < LogStash::Outputs::Base
       data: event.to_json.to_str
     }
     publish_to_pubsub([pubsub_message])
-  end # def event
+  end # def receive
 
   private 
   def publish_to_pubsub(messages)
@@ -40,4 +39,5 @@ class LogStash::Outputs::Pubsubio < LogStash::Outputs::Base
     rescue StandardError => e
       @logger.error(e)
     end
+  end # def publish_to_pubsub
 end # class LogStash::Outputs::Pubsubio
