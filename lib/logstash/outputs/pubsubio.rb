@@ -31,16 +31,18 @@ class LogStash::Outputs::Pubsubio < LogStash::Outputs::Base
 
   private 
   def publish_to_pubsub(messages)
-    request = Google::Apis::PubsubV1::PublishRequest.new(messages: messages)
-    @logger.debug('GCE PubSub message created')
-    begin
-      @pubsub_mutex.synchronize do
-        result = @pubsub.publish_topic(@topic, request)
-        ids = result.message_ids
-        @logger.debug("GCE PubSub message published to topic #{@topic}, received the following IDs: '#{ids}'")
+    if !messages.empty?
+      request = Google::Apis::PubsubV1::PublishRequest.new(messages: messages)
+      @logger.debug('GCE PubSub message created')
+      begin
+        @pubsub_mutex.synchronize do
+          result = @pubsub.publish_topic(@topic, request)
+          ids = result.message_ids
+          @logger.debug("GCE PubSub message published to topic #{@topic}, received the following IDs: '#{ids}'")
+        end
+      rescue Exception => e
+        @logger.error("Exception occured during publishing", :exception => e)
       end
-    rescue Exception => e
-      @logger.error("Exception occured during publishing", :exception => e)
     end
   end # def publish_to_pubsub
 end # class LogStash::Outputs::Pubsubio
